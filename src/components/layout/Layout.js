@@ -9,7 +9,9 @@ const Layout = ({ children }) => {
     <Box minHeight="100vh" display="flex" flexDirection="column">
       <Header />
       <FixedNavbar />
-      <Box flex={1}>{children}</Box>
+      <Box flex="1" mb="auto">
+        {children}
+      </Box>
       <Footer />
     </Box>
   );

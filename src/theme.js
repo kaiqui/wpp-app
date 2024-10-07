@@ -1,80 +1,73 @@
 import { extendTheme } from '@chakra-ui/react';
 
-const colors = {
-  brand: {
-    50: '#E6F0FF',
-    100: '#B8D5FF',
-    200: '#8ABAFF',
-    300: '#5C9FFF',
-    400: '#2E84FF',
-    500: '#0069FF', // Cor principal
-    600: '#0054CC',
-    700: '#003F99',
-    800: '#002A66',
-    900: '#001533',
-  },
-  accent: {
-    50: '#FFF5E6',
-    100: '#FFE0B2',
-    200: '#FFCC80',
-    300: '#FFB74D',
-    400: '#FFA726',
-    500: '#FF9800', // Cor de destaque
-    600: '#FB8C00',
-    700: '#F57C00',
-    800: '#EF6C00',
-    900: '#E65100',
-  },
-  background: {
-    light: 'rgba(255, 255, 255, 0.9)',
-    dark: 'rgba(0, 0, 0, 0.7)',
-  },
-  text: {
-    light: '#FFFFFF',
-    dark: '#1A202C',
-  }
-};
-
-const fonts = {
-  heading: '"Poppins", sans-serif',
-  body: '"Inter", sans-serif',
-};
-
-const components = {
-  Button: {
-    baseStyle: {
-      fontWeight: 'bold',
-      borderRadius: 'full',
-    },
-    variants: {
-      solid: (props) => ({
-        bg: `${props.colorScheme}.500`,
-        color: 'white',
-        _hover: {
-          bg: `${props.colorScheme}.600`,
-        },
-      }),
-      outline: (props) => ({
-        borderColor: `${props.colorScheme}.500`,
-        color: `${props.colorScheme}.500`,
-        _hover: {
-          bg: `${props.colorScheme}.50`,
-        },
-      }),
-    },
-  },
-};
-
 const theme = extendTheme({
-  colors,
-  fonts,
-  components,
-  styles: {
-    global: {
-      body: {
-        bg: 'background.light',
-        color: 'text.dark',
+  fonts: {
+    heading: '"Poppins", sans-serif',
+    body: '"Poppins", sans-serif',
+  },
+  colors: {
+    brand: {
+      50: '#e3f2fd',
+      100: '#bbdefb',
+      200: '#90caf9',
+      300: '#64b5f6',
+      400: '#42a5f5',
+      500: '#2196f3',
+      600: '#1e88e5',
+      700: '#1976d2',
+      800: '#1565c0',
+      900: '#0d47a1',
+    },
+  },
+  components: {
+    Button: {
+      baseStyle: {
+        fontWeight: 'bold',
+        borderRadius: 'md',
       },
+    },
+    Input: {
+      baseStyle: {
+        field: {
+          borderRadius: 'md',
+        },
+      },
+    },
+    Select: {
+      baseStyle: {
+        field: {
+          borderRadius: 'md',
+        },
+      },
+    },
+    Textarea: {
+      baseStyle: {
+        borderRadius: 'md',
+      },
+    },
+  },
+  config: {
+    initialColorMode: 'light',
+    useSystemColorMode: false,
+  },
+  styles: {
+    global: (props) => ({
+      body: {
+        bg: props.colorMode === 'light' ? 'gray.50' : 'gray.800',
+        color: props.colorMode === 'light' ? 'gray.800' : 'white',
+      },
+    }),
+  },
+  semanticTokens: {
+    colors: {
+      headerBg: { default: 'white', _dark: 'gray.800' },
+      headerColor: { default: 'gray.800', _dark: 'white' },
+      footerBg: { default: 'gray.100', _dark: 'gray.700' },
+      footerColor: { default: 'gray.600', _dark: 'gray.200' },
+      cardBg: { default: 'white', _dark: 'gray.700' },
+      cardBorder: { default: 'gray.200', _dark: 'gray.600' },
+      inputBg: { default: 'white', _dark: 'gray.700' },
+      inputBorder: { default: 'gray.300', _dark: 'gray.600' },
     },
   },
 });

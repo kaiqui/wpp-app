@@ -1,24 +1,31 @@
 import React from 'react';
-import { Box, Flex, Button, Spacer } from '@chakra-ui/react';
+import { Box, Flex, Button, useColorMode } from '@chakra-ui/react';
 import { Link } from 'react-router-dom';
 
 const Header = () => {
+  const { colorMode, toggleColorMode } = useColorMode();
+
   return (
-    <Box bg="white" boxShadow="sm" py={4}>
-      <Flex maxW="container.xl" mx="auto" px={4} align="center">
-        <Box fontWeight="bold" fontSize="xl">
-          <Link to="/">WppApp</Link>
-        </Box>
-        <Spacer />
+    <Box as="header" bg="headerBg" color="headerColor" py={4}>
+      <Flex maxW="container.xl" mx="auto" alignItems="center" justifyContent="space-between">
+        <Link to="/">
+          <Box fontWeight="bold" fontSize="xl">
+            Your Logo
+          </Box>
+        </Link>
         <Flex>
-          <Button as={Link} to="/beneficios" variant="ghost" mr={2}>
-            Benefícios
-          </Button>
-          <Button as={Link} to="/planos" variant="ghost" mr={2}>
-            Planos
-          </Button>
-          <Button as={Link} to="/contato" colorScheme="brand" variant="solid">
-            Contato
+          <Link to="/">
+            <Button variant="ghost" mr={2}>
+              Home
+            </Button>
+          </Link>
+          <Link to="/form">
+            <Button variant="ghost" mr={2}>
+              Form
+            </Button>
+          </Link>
+          <Button onClick={toggleColorMode}>
+            {colorMode === 'light' ? 'Dark' : 'Light'} Mode
           </Button>
         </Flex>
       </Flex>

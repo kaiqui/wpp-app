@@ -41,26 +41,21 @@ const Contact = () => {
             <Button 
               leftIcon={<FaWhatsapp />} 
               colorScheme="green" 
+              fontSize={'sm'}
               size="lg" 
               onClick={handleAgathaChatRedirect}
+              boxShadow={
+                '0px 1px 25px -5px rgb(37 211 102 / 48%), 0 10px 10px -5px rgb(37 211 102 / 43%)'
+              }
+              _hover={{
+                bg: 'green.600',
+              }}
+              _focus={{
+                bg: 'green.300',
+              }}
             >
               Falar com a Agatha no WhatsApp
             </Button>
-            <ContactInfo 
-              icon={FaEnvelope} 
-              title="Email" 
-              content="contato@seudominio.com" 
-            />
-            <ContactInfo 
-              icon={FaPhone} 
-              title="Telefone" 
-              content="+55 (11) 1234-5678" 
-            />
-            <ContactInfo 
-              icon={FaMapMarkerAlt} 
-              title="Endereço" 
-              content="Rua Exemplo, 123 - São Paulo, SP" 
-            />
           </VStack>
           <VStack spacing={6} align="stretch" flex={1}>
             <Heading as="h3" size="lg" color="gray.800">
@@ -72,7 +67,7 @@ const Contact = () => {
             <VStack align="start" spacing={4}>
               <HStack>
                 <Icon as={FaCheckCircle} color="green.500" />
-                <Text>Responder suas dúvidas rapidamente</Text>
+                <Text color="gray.600">Responder suas dúvidas rapidamente</Text>
               </HStack>
               <HStack>
                 <Icon as={FaCheckCircle} color="green.500" />
