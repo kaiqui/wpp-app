@@ -37,7 +37,7 @@ const FixedNavbar = () => {
       boxShadow="0 2px 4px rgba(0,0,0,0.1)"
       zIndex={1000}
     >
-      <Box color="white" maxWidth="1280px" margin="0 auto">
+      <Box maxWidth="1280px" margin="0 auto">
         <Flex
           px={4}
           py={2}
@@ -46,28 +46,28 @@ const FixedNavbar = () => {
         >
           <Flex flexDirection="row" justifyContent="center" alignItems="center">
             <Link as={ScrollLink} to="hero" smooth={true} duration={500}>
-              <Button colorScheme="brand" variant="ghost" mr={2}>
+              <Button colorScheme="brand" variant="ghost" mr={2} color="brand.700">
                 Início
               </Button>
             </Link>
             <Link as={ScrollLink} to="features" smooth={true} duration={500}>
-              <Button colorScheme="brand" variant="ghost" mr={2}>
+              <Button colorScheme="brand" variant="ghost" mr={2} color="brand.700">
                 Produtos
               </Button>
             </Link>
             <Link as={ScrollLink} to="benefits" smooth={true} duration={500}>
-              <Button colorScheme="brand" variant="ghost" mr={2}>
+              <Button colorScheme="brand" variant="ghost" mr={2} color="brand.700">
                 Benefícios
               </Button>
             </Link>
             <Link as={ScrollLink} to="pricing" smooth={true} duration={500}>
-              <Button colorScheme="brand" variant="ghost" mr={2}>
+              <Button colorScheme="brand" variant="ghost" mr={2} color="brand.700">
                 Planos e Preços
               </Button>
             </Link>
           </Flex>
           <Link as={ScrollLink} to="contact" smooth={true} duration={500}>
-            <Button colorScheme="brand">Contato</Button>
+            <Button colorScheme="brand" color="white">Contato</Button>
           </Link>
         </Flex>
       </Box>
