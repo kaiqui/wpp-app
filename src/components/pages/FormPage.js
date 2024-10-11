@@ -36,8 +36,14 @@ import {
   AlertDialogOverlay,
   UnorderedList,
   ListItem,
+  Spinner,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalBody,
 } from '@chakra-ui/react';
-import { AddIcon } from '@chakra-ui/icons';
+import { AddIcon, ChevronRightIcon, ChevronLeftIcon, InfoIcon } from '@chakra-ui/icons';
+import { useNavigate } from 'react-router-dom';
 
 function FormPage() {
   const [formData, setFormData] = useState({
@@ -94,6 +100,12 @@ function FormPage() {
   const [addressNumber, setAddressNumber] = useState('');
   const [complement, setComplement] = useState('');
 
+  const navigate = useNavigate();
+  const [currentTab, setCurrentTab] = useState(0);
+  const totalTabs = 5;
+
+  const [isLoading, setIsLoading] = useState(false);
+
   // Adicione esta função para atualizar o campo de localização
   const updateLocation = () => {
     const fullAddress = `${addressDetails.logradouro}, ${addressNumber}, ${complement}, ${addressDetails.bairro}, ${addressDetails.localidade} - ${addressDetails.uf}, ${cep}`.trim();
@@ -101,6 +113,10 @@ function FormPage() {
   };
 
   const fetchAddressDetails = async (cep) => {
+    if (cep.length !== 8) {
+      return;
+    }
+
     try {
       const response = await axios.get(`https://viacep.com.br/ws/${cep}/json/`);
       if (!response.data.erro) {
@@ -110,7 +126,7 @@ function FormPage() {
           localidade: response.data.localidade,
           uf: response.data.uf,
         });
-        updateLocation(); // Chame esta função após atualizar os detalhes do endereço
+        updateLocation();
       } else {
         toast({
           title: "CEP não encontrado",
@@ -119,8 +135,16 @@ function FormPage() {
           duration: 3000,
           isClosable: true,
         });
+        // Limpar os campos de endereço quando o CEP não for encontrado
+        setAddressDetails({
+          logradouro: '',
+          bairro: '',
+          localidade: '',
+          uf: '',
+        });
       }
     } catch (error) {
+      console.error('Erro ao buscar CEP:', error);
       toast({
         title: "Erro ao buscar CEP",
         description: "Ocorreu um erro ao buscar as informações do CEP.",
@@ -128,14 +152,33 @@ function FormPage() {
         duration: 3000,
         isClosable: true,
       });
+      // Limpar os campos de endereço em caso de erro
+      setAddressDetails({
+        logradouro: '',
+        bairro: '',
+        localidade: '',
+        uf: '',
+      });
     }
   };
 
-  useEffect(() => {
-    if (cep.length === 8) {
-      fetchAddressDetails(cep);
+  const handleCepChange = (e) => {
+    const newCep = e.target.value.replace(/\D/g, '');
+    setCep(newCep);
+    if (newCep.length === 8) {
+      fetchAddressDetails(newCep);
+    } else {
+      // Limpar os campos de endereço quando o CEP for apagado ou inválido
+      setAddressDetails({
+        logradouro: '',
+        bairro: '',
+        localidade: '',
+        uf: '',
+      });
     }
-  }, [cep]);
+  };
+
+  // Remova o useEffect para o CEP, pois agora estamos usando handleCepChange
 
   // Adicione useEffect para atualizar a localização quando os detalhes do endereço mudarem
   useEffect(() => {
@@ -218,6 +261,15 @@ function FormPage() {
     const requiredFields = [
       { name: 'Nome do Negócio', value: formData.businessName },
       { name: 'Tipo de Negócio', value: formData.businessType },
+      { name: 'Localização', value: formData.location },
+      { name: 'Horário de Funcionamento', value: Object.values(formData.businessHours).some(day => day.isOpen) },
+      { name: 'Serviços', value: formData.businessDetails.services.length > 0 },
+      { name: 'Métodos de Pagamento', value: formData.businessDetails.paymentMethods.length > 0 },
+      { name: 'Tempo Médio de Serviço', value: formData.businessDetails.averageServiceTime > 0 },
+      { name: 'Políticas de Agendamento', value: formData.businessDetails.appointmentPolicies.length > 0 },
+      { name: 'Produtos ou Serviços', value: formData.businessDetails.productsOrServices.length > 0 },
+      { name: 'Tom de Comunicação', value: formData.communicationStyle.tone },
+      { name: 'Idiomas', value: formData.communicationStyle.languages.length > 0 },
     ];
 
     const emptyRequiredFields = requiredFields.filter(field => !field.value);
@@ -226,13 +278,25 @@ function FormPage() {
     return emptyRequiredFields.length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const handleNextTab = () => {
+    if (currentTab < totalTabs - 1) {
+      setCurrentTab(currentTab + 1);
+    }
+  };
+
+  const handlePrevTab = () => {
+    if (currentTab > 0) {
+      setCurrentTab(currentTab - 1);
+    }
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (validateForm()) {
       setIsAlertOpen(true);
     } else {
       toast({
-        title: "Campos obrigatórios vazios",
+        title: "Campos obrigatórios não preenchidos",
         description: "Por favor, preencha todos os campos obrigatórios antes de enviar.",
         status: "warning",
         duration: 5000,
@@ -241,16 +305,44 @@ function FormPage() {
     }
   };
 
-  const confirmSubmit = () => {
+  const confirmSubmit = async () => {
     setIsAlertOpen(false);
-    console.log(formData);
-    toast({
-      title: "Formulário enviado",
-      description: "Recebemos suas informações e entraremos em contato em breve.",
-      status: "success",
-      duration: 5000,
-      isClosable: true,
-    });
+    if (validateForm()) {
+      setIsLoading(true);
+      try {
+        const response = await axios.post('http://localhost:8000/v1/api/businesses', formData);
+        console.log(response.data);
+        toast({
+          title: "Cadastro realizado com sucesso",
+          description: "Seus dados foram enviados. Redirecionando para o dashboard...",
+          status: "success",
+          duration: 3000,
+          isClosable: true,
+        });
+        setTimeout(() => {
+          setIsLoading(false);
+          navigate('/dashboard');
+        }, 3000);
+      } catch (error) {
+        console.error('Erro ao enviar dados:', error);
+        toast({
+          title: "Erro ao enviar dados",
+          description: "Ocorreu um erro ao enviar seus dados. Por favor, tente novamente.",
+          status: "error",
+          duration: 5000,
+          isClosable: true,
+        });
+        setIsLoading(false);
+      }
+    } else {
+      toast({
+        title: "Campos obrigatórios não preenchidos",
+        description: "Por favor, preencha todos os campos obrigatórios antes de enviar.",
+        status: "warning",
+        duration: 5000,
+        isClosable: true,
+      });
+    }
   };
 
   const businessTypes = ['Salão de Beleza', 'Barbearia', 'Spa', 'Clínica de Estética', 'Outro'];
@@ -271,8 +363,8 @@ function FormPage() {
     <Box p={8} maxWidth="800px" margin="auto" mt={10}>
       <VStack spacing={8} align="stretch">
         <Heading>Cadastro de Negócio</Heading>
-        <form onSubmit={handleSubmit}>
-          <Tabs isFitted variant="enclosed">
+        <form onSubmit={(e) => e.preventDefault()}>
+          <Tabs index={currentTab} onChange={setCurrentTab} isFitted variant="enclosed">
             <TabList mb="1em">
               <Tab>Informações Básicas</Tab>
               <Tab>Horário de Funcionamento</Tab>
@@ -319,7 +411,7 @@ function FormPage() {
                     <FormLabel>CEP</FormLabel>
                     <Input 
                       value={cep}
-                      onChange={(e) => setCep(e.target.value.replace(/\D/g, ''))}
+                      onChange={handleCepChange}
                       placeholder="Digite o CEP"
                       maxLength={8}
                     />
@@ -674,11 +766,52 @@ function FormPage() {
               </TabPanel>
             </TabPanels>
           </Tabs>
-          <Button type="submit" colorScheme="blue" mt={6} size="lg" width="full">
-            Enviar Cadastro
-          </Button>
+          
+          <Flex justifyContent="space-between" mt={6}>
+            <Button
+              leftIcon={<ChevronLeftIcon />}
+              onClick={handlePrevTab}
+              isDisabled={currentTab === 0}
+            >
+              Anterior
+            </Button>
+            {currentTab < totalTabs - 1 ? (
+              <Button
+                rightIcon={<ChevronRightIcon />}
+                onClick={handleNextTab}
+                colorScheme="blue"
+              >
+                Próximo
+              </Button>
+            ) : (
+              <Button onClick={handleSubmit} colorScheme="green">
+                Enviar Cadastro
+              </Button>
+            )}
+          </Flex>
         </form>
       </VStack>
+
+      <Box mt={4} p={4} bg="blue.50" borderRadius="md" boxShadow="md">
+        <Flex alignItems="center">
+          <InfoIcon boxSize={6} color="blue.500" mr={3} />
+          <VStack align="start" spacing={2}>
+            <Text fontWeight="bold" fontSize="lg">Dica para um cadastro rápido:</Text>
+            <Text>
+              1. Navegue pelas abas usando os botões "Anterior" e "Próximo".
+            </Text>
+            <Text>
+              2. Preencha todas as informações em cada aba antes de prosseguir.
+            </Text>
+            <Text>
+              3. Revise seus dados na última aba antes de enviar o cadastro.
+            </Text>
+            <Text fontStyle="italic" color="blue.600">
+              Estamos aqui para ajudar! Se tiver dúvidas, não hesite em nos contatar.
+            </Text>
+          </VStack>
+        </Flex>
+      </Box>
 
       <AlertDialog
         isOpen={isAlertOpen}
@@ -708,8 +841,8 @@ function FormPage() {
       </AlertDialog>
 
       {emptyFields.length > 0 && (
-        <Box mt={4} p={4} bg="red.100" borderRadius="md">
-          <Text fontWeight="bold">Os seguintes campos obrigatórios estão vazios:</Text>
+        <Box mt={4} p={4} bg="orange.100" borderRadius="md">
+          <Text fontWeight="bold">Por favor, preencha os seguintes campos obrigatórios:</Text>
           <UnorderedList>
             {emptyFields.map((field, index) => (
               <ListItem key={index}>{field.name}</ListItem>
@@ -717,6 +850,26 @@ function FormPage() {
           </UnorderedList>
         </Box>
       )}
+
+      <Modal isOpen={isLoading} onClose={() => {}} isCentered>
+        <ModalOverlay />
+        <ModalContent bg="transparent" boxShadow="none">
+          <ModalBody display="flex" alignItems="center" justifyContent="center">
+            <VStack spacing={4}>
+              <Spinner
+                thickness="4px"
+                speed="0.65s"
+                emptyColor="gray.200"
+                color="blue.500"
+                size="xl"
+              />
+              <Text color="white" fontWeight="bold">
+                Enviando dados...
+              </Text>
+            </VStack>
+          </ModalBody>
+        </ModalContent>
+      </Modal>
     </Box>
   );
 }
